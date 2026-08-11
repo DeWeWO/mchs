@@ -1,0 +1,151 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  MCHS_USER
+  ORG_OPERATOR
+  MAP_OPERATOR
+  HAZARD_OPERATOR
+}
+
+enum DeviceStatus {
+  ONLINE
+  OFFLINE
+  WARNING
+  DANGER
+}
+
+enum IncidentStatus {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+  FALSE_ALARM
+}
+
+model Organization {
+  id          String   @id @default(uuid())
+  name        String
+  type        String
+  address     String?
+  lat         Float?
+  lng         Float?
+  ownerName   String?
+  ownerPhone  String?
+  users       User[]
+  devices     Device[]
+  incidents   Incident[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model User {
+  id             String        @id @default(uuid())
+  fullName       String?
+  username       String        @unique
+  password       String
+  phone          String?
+  role           Role
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model Device {
+  id               String        @id @default(uuid())
+  name             String
+  token            String        @unique
+  type             String        @default("multi")
+  gasLevel         Float         @default(0.0)
+  smokeDetected    Boolean       @default(false)
+  quakeMagnitude   Float         @default(0.0)
+  methaneLevel     Float         @default(0.0)
+  floor            Int?          @default(1)
+  addressDetails   String?
+  status           DeviceStatus  @default(OFFLINE)
+  isGlobalAlert    Boolean       @default(false)
+  installedBy      String?
+  batteryLevel     Int           @default(100)
+  lastSeen         DateTime?     @default(now())
+  lat              Float?
+  lng              Float?
+  organization     Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId   String?
+  incidents        Incident[]
+  readings         DeviceReading[]
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+}
+
+model DeviceReading {
+  id             String   @id @default(uuid())
+  device         Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  deviceId       String
+  gasLevel       Float?
+  methaneLevel   Float?
+  quakeMagnitude Float?
+  smokeDetected  Boolean?
+  batteryLevel   Int?
+  temperature    Float?
+  raw            Json?
+  createdAt      DateTime @default(now())
+
+  @@index([deviceId])
+  @@index([createdAt])
+}
+
+model WaterCamera {
+  id        String   @id @default(uuid())
+  name      String
+  streamUrl String
+  lat       Float
+  lng       Float
+  status    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Incident {
+  id              String        @id @default(uuid())
+  type            String
+  description     String
+  lat             Float
+  lng             Float
+  status          IncidentStatus @default(NEW)
+  resolved        Boolean       @default(false)
+  resolvedAt      DateTime?
+  resolvedBy      String?
+  metadata        Json?
+  device          Device?       @relation(fields: [deviceId], references: [id], onDelete: SetNull)
+  deviceId        String?
+  organization    Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  organizationId  String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  username  String?
+  role      String?
+  action    String
+  entity    String?
+  entityId  String?
+  metadata  Json?
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}

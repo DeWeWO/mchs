@@ -1,0 +1,7 @@
+-- AlterTable
+ALTER TABLE "Device" ADD COLUMN     "addressDetails" TEXT,
+ADD COLUMN     "batteryLevel" INTEGER NOT NULL DEFAULT 100,
+ADD COLUMN     "floor" INTEGER DEFAULT 1,
+ADD COLUMN     "installedBy" TEXT,
+ADD COLUMN     "lastSeen" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN     "type" TEXT NOT NULL DEFAULT 'multi';

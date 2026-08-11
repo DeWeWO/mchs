@@ -1,0 +1,339 @@
+@import "tailwindcss";
+
+@theme {
+    /* Регистрируем наши семантические цвета в Tailwind */
+    --color-bg-app: var(--bg-app);
+    --color-surface: var(--surface);
+    --color-surface-hover: var(--surface-hover);
+    --color-text-main: var(--text-main);
+    --color-text-muted: var(--text-muted);
+    --color-border: var(--border);
+
+    /* Брендовые цвета (остаются яркими всегда) */
+    --color-brand-blue: #00aaff;
+    --color-brand-green: #00ff87;
+    --color-brand-red: #ff4757;
+    --color-brand-yellow: #ffc107;
+}
+
+/* --- ЦВЕТОВЫЕ СХЕМЫ --- */
+:root {
+    /* СВЕТЛАЯ ТЕМА (Light) */
+    --bg-app: #e2e8f0;
+    /* Светло-серый фон */
+    --surface: rgba(255, 255, 255, 0.75);
+    /* Белое стекло */
+    --surface-hover: rgba(255, 255, 255, 0.9);
+    --text-main: #0f172a;
+    /* Темно-синий текст */
+    --text-muted: #64748b;
+    /* Серый текст */
+    --border: rgba(148, 163, 184, 0.2);
+    /* Легкая граница */
+}
+
+.dark {
+    /* ТЕМНАЯ ТЕМА (Dark) */
+    --bg-app: #000000;
+    /* Черный фон */
+    --surface: rgba(15, 23, 42, 0.6);
+    /* Темное стекло */
+    --surface-hover: rgba(30, 41, 59, 0.8);
+    --text-main: #f1f5f9;
+    /* Белый текст */
+    --text-muted: #94a3b8;
+    /* Серый текст */
+    --border: rgba(255, 255, 255, 0.1);
+}
+
+/* Базовые стили */
+html,
+body,
+#root {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: var(--bg-app);
+    color: var(--text-main);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Класс стекла (Glassmorphism) */
+.glass-panel {
+    background-color: var(--surface);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+/* Скроллбар */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+/* Карта MapLibre */
+.maplibregl-map {
+    width: 100% !important;
+    height: 100% !important;
+    position: absolute !important;
+    top: 0;
+    left: 0;
+}
+
+/* Попапы на карте */
+.glass-popup .maplibregl-popup-content {
+    background-color: var(--surface) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text-main) !important;
+    border-radius: 12px !important;
+    padding: 0 !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3) !important;
+}
+
+.glass-popup .maplibregl-popup-tip {
+    display: none !important;
+}
+
+.glass-popup .maplibregl-popup-close-button {
+    color: var(--text-muted) !important;
+    font-size: 16px !important;
+    padding: 5px 8px !important;
+    outline: none !important;
+}
+
+.glass-popup .maplibregl-popup-close-button:hover {
+    color: var(--text-main) !important;
+    background-color: var(--surface-hover) !important;
+    border-radius: 0 12px 0 0 !important;
+}
+
+html,
+body,
+#root {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    /* Важно, чтобы не было скроллов */
+}
+
+/* Дополнительная страховка для контейнера карты */
+.maplibregl-map {
+    width: 100% !important;
+    height: 100% !important;
+    position: absolute !important;
+    top: 0;
+    left: 0;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #3a3f51;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #4d5367;
+}
+
+/* --- MCHS BASE MARKER --- */
+.base-marker-container {
+    width: 60px;
+    height: 60px;
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.base-pulse {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background: rgba(249, 115, 22, 0.3);
+    /* Orange pulse */
+    border-radius: 50%;
+    animation: pulse-ring 2s infinite;
+}
+
+.base-icon-wrapper {
+    position: relative;
+    z-index: 10;
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+    /* Darker Orange */
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 4px 15px rgba(234, 88, 12, 0.5);
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.base-marker-container:hover .base-icon-wrapper {
+    transform: scale(1.15);
+    border-color: #fff;
+    box-shadow: 0 0 20px rgba(234, 88, 12, 0.7);
+}
+
+.base-label {
+    position: absolute;
+    top: -35px;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(4px);
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateY(5px);
+    transition: all 0.2s ease;
+    pointer-events: none;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.base-marker-container:hover .base-label {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@keyframes pulse-ring {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.6;
+    }
+
+    100% {
+        transform: scale(2.5);
+        opacity: 0;
+    }
+}
+
+/* --- BUILDING MARKER --- */
+.building-marker {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4), 0 4px 6px -2px rgba(37, 99, 235, 0.2);
+    transform: perspective(500px) rotateX(20deg);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.building-marker:hover {
+    transform: perspective(500px) rotateX(0deg) scale(1.1) translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.5);
+    z-index: 50;
+}
+
+.building-marker.is-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #991b1b 100%);
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+    animation: bounce-danger 1s infinite;
+}
+
+/* --- SENSOR MARKER --- */
+.sensor-marker {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    color: #64748b;
+}
+
+.sensor-marker:hover {
+    transform: scale(1.2);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    z-index: 50;
+}
+
+.sensor-marker.status-good {
+    border-color: #22c55e;
+    color: #22c55e;
+    background: #f0fdf4;
+}
+
+.sensor-marker.status-warning {
+    border-color: #f59e0b;
+    color: #f59e0b;
+    background: #fffbeb;
+}
+
+.sensor-marker.status-danger {
+    border-color: #ef4444;
+    color: #ef4444;
+    background: #fef2f2;
+    animation: pulse-red 1.5s infinite;
+}
+
+@keyframes bounce-danger {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+@keyframes pulse-red {
+    0% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
+}
