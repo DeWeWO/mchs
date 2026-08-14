@@ -59,4 +59,5 @@ Thumbs.db
 *.sqlite
 *.sqlite3
 backup_before_phase2.sql
+DEPLOYMENT.md
 
