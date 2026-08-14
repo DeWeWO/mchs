@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { 
     Activity, Wind, Wifi, Zap, Droplets, 
-    Navigation, Users, AlertCircle, Calendar 
+    Navigation, Users, AlertCircle, Calendar,
+    Sun, Cloud, CloudRain, CloudLightning, Snowflake, CloudFog, CloudDrizzle
 } from 'lucide-react';
 import GlassCard from '../components/ui/GlassCard';
 import RadiationChart from '../components/widgets/RadiationChart';
@@ -16,6 +17,18 @@ const getAuthHeader = () => {
     } catch {
         return {};
     }
+};
+
+const getWmoWeather = (code) => {
+    if (code === 0) return { desc: 'Ясно', Icon: Sun, color: 'text-yellow-400' };
+    if ([1, 2].includes(code)) return { desc: 'Переменная облачность', Icon: Cloud, color: 'text-gray-300' };
+    if (code === 3) return { desc: 'Пасмурно', Icon: Cloud, color: 'text-gray-400' };
+    if ([45, 48].includes(code)) return { desc: 'Туман', Icon: CloudFog, color: 'text-gray-400' };
+    if ([51, 53, 55, 56, 57].includes(code)) return { desc: 'Морось', Icon: CloudDrizzle, color: 'text-blue-300' };
+    if ([61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return { desc: 'Дождь', Icon: CloudRain, color: 'text-blue-400' };
+    if ([71, 73, 75, 77, 85, 86].includes(code)) return { desc: 'Снег', Icon: Snowflake, color: 'text-blue-200' };
+    if ([95, 96, 99].includes(code)) return { desc: 'Гроза', Icon: CloudLightning, color: 'text-purple-400' };
+    return { desc: 'Неизвестно', Icon: Cloud, color: 'text-gray-400' };
 };
 
 export default function Dashboard() {
@@ -54,28 +67,29 @@ export default function Dashboard() {
         return () => clearInterval(interval);
     }, []);
 
-    // 3. Загрузка Погоды
+    // 3. Загрузка Погоды (Open-Meteo, ключ не нужен)
     useEffect(() => {
-        if (!WEATHER_KEY) {
-            setWeatherError('Ключ погоды не задан');
-            return;
-        }
         let cancelled = false;
         const fetchWeather = async () => {
             try {
                 setWeatherError(null);
-                const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${WEATHER_COORDS.lat}&lon=${WEATHER_COORDS.lon}&units=metric&lang=ru&appid=${WEATHER_KEY}`);
+                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${WEATHER_COORDS.lat}&longitude=${WEATHER_COORDS.lon}&current=temperature_2m,relative_humidity_2m,weather_code,surface_pressure,wind_speed_10m,wind_direction_10m`);
                 if (!res.ok) throw new Error('weather');
                 const data = await res.json();
                 if (cancelled) return;
+                
+                const current = data.current;
+                const weatherInfo = getWmoWeather(current.weather_code);
+                
                 setWeather({
-                    temp: Math.round(data.main.temp),
-                    desc: data.weather[0].description,
-                    wind: data.wind.speed,
-                    deg: data.wind.deg,
-                    humidity: data.main.humidity,
-                    pressure: data.main.pressure,
-                    icon: data.weather[0].icon
+                    temp: Math.round(current.temperature_2m),
+                    desc: weatherInfo.desc,
+                    wind: Math.round(current.wind_speed_10m * 10) / 10, // km/h (можно перевести в м/с разделив на 3.6 если нужно)
+                    deg: current.wind_direction_10m,
+                    humidity: current.relative_humidity_2m,
+                    pressure: Math.round(current.surface_pressure),
+                    Icon: weatherInfo.Icon,
+                    iconColor: weatherInfo.color
                 });
             } catch (e) {
                 if (!cancelled) {
@@ -129,11 +143,15 @@ export default function Dashboard() {
                             <div className="text-4xl font-bold text-text-main">{weather.temp}°C</div>
                             <div className="text-sm text-brand-blue capitalize">{weather.desc}</div>
                         </div>
-                        <img src={`https://openweathermap.org/img/wn/${weather.icon}@2x.png`} alt="icon" className="w-16 h-16 -mt-2 -mr-2 opacity-80"/>
+                        {weather.Icon ? (
+                            <weather.Icon size={48} className={`-mt-1 opacity-90 ${weather.iconColor}`} />
+                        ) : (
+                            <Cloud size={48} className="-mt-1 opacity-50 text-gray-400" />
+                        )}
                     </div>
                     <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-text-muted">
                         <div className="flex items-center gap-1"><Droplets size={12} className="text-blue-400"/> {weather.humidity}%</div>
-                        <div className="flex items-center gap-1"><Wind size={12}/> {weather.wind} м/с</div>
+                        <div className="flex items-center gap-1"><Wind size={12}/> {weather.wind} км/ч</div>
                         {weatherError && <div className="col-span-2 text-[11px] text-brand-red mt-1">{weatherError}</div>}
                     </div>
                 </GlassCard>
